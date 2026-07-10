@@ -1,41 +1,44 @@
 /* ==========================================
-   SCRIM ARENA V2
-   script.js
+   SCRIM ARENA V3
+   Powered by Firebase
 ========================================== */
 
-const maxTeam = 16;
-
-let teams = [];
-
-let registrationOpen = true;
-
-
+import {
+    addTeam,
+    listenTeams,
+    saveMatch,
+    listenBracket,
+    getSettings
+} from "./firebase.js";
 
 /* ==========================================
-COUNTDOWN DATE
+GLOBAL
 ========================================== */
 
-// GANTI TANGGAL PENDAFTARAN
-const registrationDate = new Date(
-"2026-07-30T18:00:00"
-).getTime();
+const app = {
 
-// GANTI TANGGAL MATCH
-const matchDate = new Date(
-"2026-07-30T19:00:00"
-).getTime();
+    teams: [],
 
+    bracket: [],
+
+    settings: {
+
+        maxTeam: 16,
+
+        registrationOpen: true,
+
+        registrationDate: null,
+
+        matchDate: null
+
+    }
+
+};
 
 
 /* ==========================================
 ELEMENT
 ========================================== */
-
-const teamList =
-document.getElementById("teamList");
-
-const teamCounter =
-document.getElementById("teamCount");
 
 const registerForm =
 document.getElementById("registerForm");
@@ -46,197 +49,157 @@ document.getElementById("submitBtn");
 const statusText =
 document.getElementById("tournamentStatus");
 
+const teamCounter =
+document.getElementById("teamCount");
+
+const teamList =
+document.getElementById("teamList");
+
+const bracketContainer =
+document.getElementById("bracket");
+
+
+/* Countdown */
+
+const regDay =
+document.getElementById("regDays");
+
+const regHour =
+document.getElementById("regHours");
+
+const regMinute =
+document.getElementById("regMinutes");
+
+const regSecond =
+document.getElementById("regSeconds");
+
+const matchDay =
+document.getElementById("matchDays");
+
+const matchHour =
+document.getElementById("matchHours");
+
+const matchMinute =
+document.getElementById("matchMinutes");
+
+const matchSecond =
+document.getElementById("matchSeconds");
 
 
 /* ==========================================
-COUNTDOWN
+INIT
 ========================================== */
 
-function updateCountdown(){
+async function init(){
 
-const now = Date.now();
+    console.log("Loading...");
 
-updateTimer(
+    await loadSettings();
 
-registrationDate,
+    realtimeTeam();
 
-"regDays",
+    realtimeBracket();
 
-"regHours",
-
-"regMinutes",
-
-"regSeconds"
-
-);
-
-updateTimer(
-
-matchDate,
-
-"matchDays",
-
-"matchHours",
-
-"matchMinutes",
-
-"matchSeconds"
-
-);
-
-if(now >= registrationDate){
-
-registrationOpen = false;
-
-submitBtn.disabled = true;
-
-submitBtn.innerText =
-"REGISTRATION CLOSED";
-
-statusText.innerHTML =
-"🔴 REGISTRATION CLOSED";
+    startCountdown();
 
 }
 
-}
+window.addEventListener(
 
-setInterval(updateCountdown,1000);
+"DOMContentLoaded",
 
-updateCountdown();
+init
 
+);
 
 
 /* ==========================================
-UPDATE TIMER
+SETTING
 ========================================== */
 
-function updateTimer(
+async function loadSettings(){
 
-target,
+    const setting =
+    await getSettings();
 
-day,
+    if(setting){
 
-hour,
+        app.settings = {
 
-minute,
+            ...app.settings,
 
-second
+            ...setting
 
-){
+        };
 
-let distance = target - Date.now();
-
-if(distance < 0){
-
-distance = 0;
+    }
 
 }
-
-const days = Math.floor(
-
-distance /
-(1000*60*60*24)
-
-);
-
-const hours = Math.floor(
-
-(distance %
-
-(1000*60*60*24))
-
-/
-
-(1000*60*60)
-
-);
-
-const minutes = Math.floor(
-
-(distance %
-
-(1000*60*60))
-
-/
-
-(1000*60)
-
-);
-
-const seconds = Math.floor(
-
-(distance %
-
-(1000*60))
-
-/
-
-1000
-
-);
-
-animateNumber(day,days);
-
-animateNumber(hour,hours);
-
-animateNumber(minute,minutes);
-
-animateNumber(second,seconds);
-
-}
-
 
 
 /* ==========================================
-ANIMATE NUMBER
+REALTIME TEAM
 ========================================== */
 
-function animateNumber(id,value){
+function realtimeTeam(){
 
-const el = document.getElementById(id);
+    listenTeams((teams)=>{
 
-const text = String(value)
-.padStart(2,"0");
+        app.teams = teams;
 
-if(el.innerText !== text){
+        renderTeam();
 
-el.style.transform="scale(1.18)";
-el.style.color="#fff";
+        updateCounter();
 
-setTimeout(()=>{
+        updateStatus();
 
-el.innerText=text;
-
-el.style.transform="scale(1)";
-el.style.color="";
-
-},120);
+    });
 
 }
-
-}
-
 
 
 /* ==========================================
-REGISTER
+REALTIME BRACKET
+========================================== */
+
+function realtimeBracket(){
+
+    listenBracket((matches)=>{
+
+        app.bracket = matches;
+
+        renderBracket();
+
+    });
+
+}
+/* ==========================================
+REGISTER FORM
 ========================================== */
 
 registerForm.addEventListener(
 
 "submit",
 
-function(e){
+registerTeam
+
+);
+
+async function registerTeam(e){
 
 e.preventDefault();
 
-if(!registrationOpen){
+if(!app.settings.registrationOpen){
 
-toast(
+toast("Pendaftaran sudah ditutup.");
 
-"Pendaftaran sudah ditutup."
+return;
 
-);
+}
+
+if(app.teams.length>=app.settings.maxTeam){
+
+toast("Slot tim sudah penuh.");
 
 return;
 
@@ -246,173 +209,157 @@ const team={
 
 name:
 
-document
-.getElementById("teamName")
-.value,
+document.getElementById("teamName")
+.value.trim(),
 
 rank:
 
-document
-.getElementById("rank")
+document.getElementById("rank")
 .value,
 
 captain:
 
-document
-.getElementById("captain")
-.value,
+document.getElementById("captain")
+.value.trim(),
 
 whatsapp:
 
-document
-.getElementById("whatsapp")
-.value,
+document.getElementById("whatsapp")
+.value.trim(),
 
 notes:
 
-document
-.getElementById("notes")
-.value
+document.getElementById("notes")
+.value.trim(),
+
+createdAt:Date.now()
 
 };
 
-addTeam(team);
 
-registerForm.reset();
+/* VALIDASI */
 
-}
+if(team.name===""){
 
-);
-
-
-
-/* ==========================================
-ADD TEAM
-========================================== */
-
-function addTeam(team){
-
-if(teams.length>=maxTeam){
-
-toast("Slot penuh.");
+toast("Nama tim wajib diisi.");
 
 return;
 
 }
 
-teams.push(team);
+if(team.captain===""){
 
-renderTeam();
+toast("Nama kapten wajib diisi.");
+
+return;
+
+}
+
+if(team.whatsapp===""){
+
+toast("Nomor WhatsApp wajib diisi.");
+
+return;
+
+}
+
+
+/* DUPLIKAT */
+
+const duplicate=
+
+app.teams.find(
+
+t=>t.name.toLowerCase()
+
+===
+
+team.name.toLowerCase()
+
+);
+
+if(duplicate){
+
+toast("Nama tim sudah digunakan.");
+
+return;
+
+}
+
+
+/* SIMPAN */
+
+submitBtn.disabled=true;
+
+submitBtn.innerHTML="LOADING...";
+
+try{
+
+await addTeam(team);
 
 toast(
 
-team.name+
-
-" berhasil didaftarkan."
+`${team.name} berhasil didaftarkan.`
 
 );
 
+registerForm.reset();
+
+}catch(error){
+
+console.error(error);
+
+toast("Gagal menyimpan data.");
+
 }
+
+submitBtn.disabled=false;
+
+submitBtn.innerHTML="ENTER THE ARENA";
+
+}
+
+
+
 /* ==========================================
-RENDER TEAM
+COUNTER
 ========================================== */
 
-function renderTeam(){
+function updateCounter(){
 
-teamList.innerHTML="";
+teamCounter.innerHTML=
 
-teamCounter.innerText=
-`${teams.length} / ${maxTeam} Team`;
+`${app.teams.length} / ${app.settings.maxTeam} Team`;
 
-if(teams.length===0){
+}
 
-teamList.innerHTML=`
-<div class="empty">
-Belum ada tim yang mendaftar.
-</div>
-`;
+
+
+/* ==========================================
+STATUS
+========================================== */
+
+function updateStatus(){
+
+if(app.settings.registrationOpen){
+
+statusText.innerHTML=
+
+"🟢 REGISTRATION OPEN";
+
+submitBtn.disabled=false;
 
 return;
 
 }
 
-teams.forEach((team,index)=>{
+statusText.innerHTML=
 
-const card=document.createElement("div");
+"🔴 REGISTRATION CLOSED";
 
-card.className="team fade-up";
-
-card.innerHTML=`
-
-<div>
-
-<strong>${index+1}. ${team.name}</strong>
-
-<br>
-
-<small>
-
-${team.rank}
-
-</small>
-
-</div>
-
-<div class="badge">
-
-READY
-
-</div>
-
-`;
-
-teamList.appendChild(card);
-
-});
-
-saveLocal();
+submitBtn.disabled=true;
 
 }
-
-
-
-/* ==========================================
-LOCAL STORAGE
-========================================== */
-
-function saveLocal(){
-
-localStorage.setItem(
-
-"scrimTeams",
-
-JSON.stringify(teams)
-
-);
-
-}
-
-function loadLocal(){
-
-const data=
-
-localStorage.getItem(
-
-"scrimTeams"
-
-);
-
-if(data){
-
-teams=JSON.parse(data);
-
-renderTeam();
-
-}
-
-}
-
-loadLocal();
 
 
 
@@ -436,11 +383,9 @@ document.body.appendChild(toast);
 
 }
 
-toast.innerHTML=`
+toast.innerHTML=
 
-✅ ${message}
-
-`;
+message;
 
 toast.classList.add("show");
 
@@ -451,524 +396,465 @@ toast.classList.remove("show");
 },3000);
 
 }
-
-
-
 /* ==========================================
-AUTO CLOSE
+COUNTDOWN
 ========================================== */
 
-function checkSlot(){
-
-if(teams.length>=maxTeam){
-
-registrationOpen=false;
-
-submitBtn.disabled=true;
-
-submitBtn.innerText="FULL";
-
-statusText.innerHTML=
-
-"🟡 SLOT FULL";
-
-}
-
-}
-
-setInterval(checkSlot,1000);
-
-
-
-/* ==========================================
-NEW TEAM EFFECT
-========================================== */
-
-function teamEffect(){
-
-teamList.animate([
-
-{
-
-transform:"scale(.96)",
-
-opacity:.5
-
-},
-
-{
-
-transform:"scale(1)",
-
-opacity:1
-
-}
-
-],{
-
-duration:300
-
-});
-
-}
-
-
-
-/* ==========================================
-UPDATE ADD TEAM
-========================================== */
-
-const oldAddTeam=addTeam;
-
-addTeam=function(team){
-
-if(teams.length>=maxTeam){
-
-toast("Slot sudah penuh.");
-
-return;
-
-}
-
-teams.push(team);
-
-renderTeam();
-
-teamEffect();
-
-toast(
-
-team.name+
-
-" berhasil masuk."
-
-);
-
-};
-
-
-
-/* ==========================================
-BUTTON RIPPLE
-========================================== */
-
-document
-
-.querySelectorAll("button,a")
-
-.forEach(button=>{
-
-button.addEventListener(
-
-"click",
-
-function(e){
-
-const ripple=
-
-document.createElement("span");
-
-ripple.className="ripple";
-
-const size=Math.max(
-
-this.clientWidth,
-
-this.clientHeight
-
-);
-
-ripple.style.width=size+"px";
-
-ripple.style.height=size+"px";
-
-ripple.style.left=
-
-e.offsetX-size/2+"px";
-
-ripple.style.top=
-
-e.offsetY-size/2+"px";
-
-this.appendChild(ripple);
-
-setTimeout(()=>{
-
-ripple.remove();
-
-},600);
-
-}
-
-);
-
-});
-
-
-
-/* ==========================================
-CARD ANIMATION
-========================================== */
-
-const observer=
-
-new IntersectionObserver(entries=>{
-
-entries.forEach(entry=>{
-
-if(entry.isIntersecting){
-
-entry.target.classList.add(
-
-"fade-up"
-
-);
-
-}
-
-});
-
-});
-
-document
-
-.querySelectorAll(".card")
-
-.forEach(card=>{
-
-observer.observe(card);
-
-});
-
-
-
-/* ==========================================
-MOUSE GLOW
-========================================== */
-
-document
-
-.querySelectorAll(".card")
-
-.forEach(card=>{
-
-card.addEventListener(
-
-"mousemove",
-
-e=>{
-
-const rect=
-
-card.getBoundingClientRect();
-
-const x=e.clientX-rect.left;
-
-const y=e.clientY-rect.top;
-
-card.style.background=
-
-`radial-gradient(circle at ${x}px ${y}px,
-rgba(248,198,48,.12),
-rgba(13,18,38,.85) 45%)`;
-
-});
-
-card.addEventListener(
-
-"mouseleave",
-
-()=>{
-
-card.style.background="";
-
-});
-
-});
-/* ==========================================
-AUTO DRAW MATCH
-========================================== */
-
-let bracketData = [];
-
-function shuffle(array){
-
-for(let i=array.length-1;i>0;i--){
-
-const j=Math.floor(Math.random()*(i+1));
-
-[array[i],array[j]]=[array[j],array[i]];
-
-}
-
-return array;
-
-}
-
-function generateBracket(){
-
-if(teams.length < 2){
-
-return;
-
-}
-
-const randomTeams = [...teams];
-
-shuffle(randomTeams);
-
-bracketData=[];
-
-for(let i=0;i<randomTeams.length;i+=2){
-
-bracketData.push({
-
-round:"Quarter Final",
-
-teamA:randomTeams[i]?.name || "BYE",
-
-teamB:randomTeams[i+1]?.name || "BYE",
-
-winner:null
-
-});
-
-}
-
-renderBracket();
-
-toast("🎲 Match berhasil diacak.");
-
-}
-
-
-
-/* ==========================================
-RENDER BRACKET
-========================================== */
-
-function renderBracket(){
-
-const bracket=document.getElementById("bracket");
-
-bracket.innerHTML="";
-
-if(bracketData.length===0){
-
-bracket.innerHTML=`
-
-<div class="empty">
-
-Bracket akan muncul setelah pendaftaran ditutup.
-
-</div>
-
-`;
-
-return;
-
-}
-
-bracketData.forEach((match,index)=>{
-
-const card=document.createElement("div");
-
-card.className="match";
-
-card.innerHTML=`
-
-<div class="match-title">
-
-${match.round}
-
-</div>
-
-<div class="team-name">
-
-<span>${match.teamA}</span>
-
-</div>
-
-<div class="team-name">
-
-<span>${match.teamB}</span>
-
-</div>
-
-`;
-
-bracket.appendChild(card);
-
-});
-
-}
-
-
-
-/* ==========================================
-AUTO DRAW
-========================================== */
-
-let drawDone=false;
+function startCountdown(){
 
 setInterval(()=>{
 
-if(
+updateRegistrationCountdown();
 
-!registrationOpen &&
+updateMatchCountdown();
 
-!drawDone &&
+checkRegistrationTime();
 
-teams.length>1
+},1000);
+
+}
+
+
+
+/* ==========================================
+REGISTRATION COUNTDOWN
+========================================== */
+
+function updateRegistrationCountdown(){
+
+if(!app.settings.registrationDate){
+
+setTimer(
+
+regDay,
+
+regHour,
+
+regMinute,
+
+regSecond,
+
+0
+
+);
+
+return;
+
+}
+
+const distance=
+
+new Date(
+
+app.settings.registrationDate
+
+).getTime()
+
+-
+
+Date.now();
+
+setTimer(
+
+regDay,
+
+regHour,
+
+regMinute,
+
+regSecond,
+
+distance
+
+);
+
+}
+
+
+
+/* ==========================================
+MATCH COUNTDOWN
+========================================== */
+
+function updateMatchCountdown(){
+
+if(!app.settings.matchDate){
+
+setTimer(
+
+matchDay,
+
+matchHour,
+
+matchMinute,
+
+matchSecond,
+
+0
+
+);
+
+return;
+
+}
+
+const distance=
+
+new Date(
+
+app.settings.matchDate
+
+).getTime()
+
+-
+
+Date.now();
+
+setTimer(
+
+matchDay,
+
+matchHour,
+
+matchMinute,
+
+matchSecond,
+
+distance
+
+);
+
+}
+
+
+
+/* ==========================================
+SET TIMER
+========================================== */
+
+function setTimer(
+
+day,
+
+hour,
+
+minute,
+
+second,
+
+distance
 
 ){
 
-drawDone=true;
+if(distance<0){
 
-generateBracket();
-
-}
-
-},1000);
-
-
-
-/* ==========================================
-MATCH STATUS
-========================================== */
-
-function updateStatus(){
-
-if(registrationOpen){
-
-statusText.innerHTML=
-
-"🟢 REGISTRATION OPEN";
-
-return;
+distance=0;
 
 }
 
-if(drawDone){
+const days=Math.floor(
 
-statusText.innerHTML=
+distance/
 
-"🟠 MATCH READY";
-
-}
-
-}
-
-setInterval(updateStatus,1000);
-
-
-
-/* ==========================================
-SIMULASI WINNER
-========================================== */
-
-function setWinner(matchIndex,winner){
-
-if(!bracketData[matchIndex]){
-
-return;
-
-}
-
-bracketData[matchIndex].winner=winner;
-
-renderBracket();
-
-}
-
-
-
-/* ==========================================
-ADMIN PREVIEW
-========================================== */
-
-window.scrim={
-
-teams,
-
-bracketData,
-
-generateBracket,
-
-setWinner,
-
-renderBracket,
-
-renderTeam
-
-};
-
-
-
-/* ==========================================
-LIVE TEAM COUNTER
-========================================== */
-
-setInterval(()=>{
-
-teamCounter.innerText=
-
-`${teams.length} / ${maxTeam} Team`;
-
-},1000);
-
-
-
-/* ==========================================
-LIVE CLOCK
-========================================== */
-
-function liveClock(){
-
-const now=new Date();
-
-const time=
-
-now.toLocaleTimeString(
-
-"id-ID",
-
-{
-
-hour:"2-digit",
-
-minute:"2-digit",
-
-second:"2-digit"
-
-}
+(1000*60*60*24)
 
 );
 
-document.title=
+const hours=Math.floor(
 
-`(${time}) SCRIM ARENA`;
+(distance%
+
+(1000*60*60*24))
+
+/
+
+(1000*60*60)
+
+);
+
+const minutes=Math.floor(
+
+(distance%
+
+(1000*60*60))
+
+/
+
+(1000*60)
+
+);
+
+const seconds=Math.floor(
+
+(distance%
+
+(1000*60))
+
+/
+
+1000
+
+);
+
+animateNumber(day,days);
+
+animateNumber(hour,hours);
+
+animateNumber(minute,minutes);
+
+animateNumber(second,seconds);
 
 }
-
-setInterval(liveClock,1000);
 
 
 
 /* ==========================================
-READY FIREBASE
+ANIMATION NUMBER
 ========================================== */
 
-// Nanti firebase.js akan memanggil:
-//
-// addFirebaseTeam(team)
-//
-// loadFirebaseTeam()
-//
-// updateFirebaseBracket()
-//
-// jadi script ini tidak perlu diubah lagi.
+function animateNumber(
+
+element,
+
+number
+
+){
+
+const value=
+
+String(number)
+
+.padStart(2,"0");
+
+if(element.innerText!==value){
+
+element.style.transform="scale(1.15)";
+
+element.innerText=value;
+
+setTimeout(()=>{
+
+element.style.transform="scale(1)";
+
+},120);
+
+}
+
+}
 
 
 
-console.log("SCRIM ARENA READY");
+/* ==========================================
+CHECK REGISTRATION
+========================================== */
+
+function checkRegistrationTime(){
+
+if(!app.settings.registrationDate){
+
+return;
+
+}
+
+const now=Date.now();
+
+const closeTime=
+
+new Date(
+
+app.settings.registrationDate
+
+).getTime();
+
+if(now>=closeTime){
+
+submitBtn.disabled=true;
+
+submitBtn.innerHTML=
+
+"REGISTRATION CLOSED";
+
+statusText.innerHTML=
+
+"🔴 REGISTRATION CLOSED";
+
+}
+
+}
+/* ==========================================
+RENDER TEAM
+========================================== */
+
+function renderTeam(){
+
+    teamList.innerHTML="";
+
+    if(app.teams.length===0){
+
+        teamList.innerHTML=`
+
+        <div class="empty">
+
+            Belum ada tim yang mendaftar.
+
+        </div>
+
+        `;
+
+        updateCounter();
+
+        return;
+
+    }
+
+    app.teams.forEach((team,index)=>{
+
+        const card=document.createElement("div");
+
+        card.className="team";
+
+        card.innerHTML=`
+
+        <div class="team-info">
+
+            <h3>${index+1}. ${team.name}</h3>
+
+            <small>${team.rank}</small>
+
+            <p>${team.captain}</p>
+
+        </div>
+
+        <div class="team-status">
+
+            READY
+
+        </div>
+
+        `;
+
+        teamList.appendChild(card);
+
+    });
+
+    updateCounter();
+
+    animateTeam();
+
+}
+
+
+
+/* ==========================================
+TEAM ANIMATION
+========================================== */
+
+function animateTeam(){
+
+    const cards=document.querySelectorAll(".team");
+
+    cards.forEach((card,index)=>{
+
+        card.animate(
+
+        [
+
+            {
+
+                opacity:0,
+
+                transform:"translateY(15px)"
+
+            },
+
+            {
+
+                opacity:1,
+
+                transform:"translateY(0)"
+
+            }
+
+        ],
+
+        {
+
+            duration:350,
+
+            delay:index*70,
+
+            easing:"ease-out",
+
+            fill:"forwards"
+
+        });
+
+    });
+
+}
+
+
+
+/* ==========================================
+TEAM COUNTER
+========================================== */
+
+function updateCounter(){
+
+    teamCounter.innerHTML=
+
+    `${app.teams.length} / ${app.settings.maxTeam} Team`;
+
+}
+
+
+
+/* ==========================================
+EMPTY CHECK
+========================================== */
+
+function hasEnoughTeam(){
+
+    return app.teams.length>=2;
+
+}
+
+
+
+/* ==========================================
+TEAM SEARCH
+========================================== */
+
+function getTeam(name){
+
+    return app.teams.find(
+
+        team=>team.name===name
+
+    );
+
+}
+
+
+
+/* ==========================================
+AUTO STATUS
+========================================== */
+
+function autoStatus(){
+
+    if(app.teams.length>=app.settings.maxTeam){
+
+        submitBtn.disabled=true;
+
+        submitBtn.innerHTML="FULL";
+
+        statusText.innerHTML=
+
+        "🟡 SLOT FULL";
+
+    }
+
+}
+
+setInterval(autoStatus,1000);
