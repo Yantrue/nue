@@ -1,88 +1,142 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>SCRIM ARENA | MLBB</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<title>SCRIM ARENA</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
-<div class="background-glow"></div>
-<div class="particles"></div>
+<div class="background"></div>
 
-<header class="hero">
+<header>
 
-    <h1>SCRIM ARENA</h1>
+<h1>SCRIM ARENA</h1>
 
-    <p>
-        MOBILE LEGENDS SCRIM TOURNAMENT
-    </p>
+<p>Mobile Legends Custom Tournament</p>
 
 </header>
 
 
-<section class="countdown-card">
 
-    <div class="live-text">
+<section class="status-card">
 
-        <span class="live-dot"></span>
+<div class="live">
 
-        LIVE SCRIM BRACKET
+<span class="dot"></span>
 
-    </div>
+LIVE SCRIM
 
-    <h2>NEXT MATCH</h2>
+</div>
 
-    <div class="countdown">
+<h2 id="tournamentStatus">
 
-        <div class="time-box">
-            <span id="days">00</span>
-            <small>Days</small>
-        </div>
+🟢 REGISTRATION OPEN
 
-        <div class="separator">:</div>
-
-        <div class="time-box">
-            <span id="hours">00</span>
-            <small>Hours</small>
-        </div>
-
-        <div class="separator">:</div>
-
-        <div class="time-box">
-            <span id="minutes">00</span>
-            <small>Minutes</small>
-        </div>
-
-        <div class="separator">:</div>
-
-        <div class="time-box">
-            <span id="seconds">00</span>
-            <small>Seconds</small>
-        </div>
-
-    </div>
+</h2>
 
 </section>
 
 
-<section class="bracket-card">
 
-    <h2>🏆 LIVE BRACKET</h2>
+<section class="countdown-wrapper">
 
-    <iframe
-        src="https://challonge.com/id/winessaa/module"
-        frameborder="0">
-    </iframe>
+<div class="countdown-card">
+
+<h3>Registration Ends In</h3>
+
+<div class="countdown">
+
+<div class="box">
+
+<span id="regDays">00</span>
+
+<small>Days</small>
+
+</div>
+
+<div class="box">
+
+<span id="regHours">00</span>
+
+<small>Hours</small>
+
+</div>
+
+<div class="box">
+
+<span id="regMinutes">00</span>
+
+<small>Minutes</small>
+
+</div>
+
+<div class="box">
+
+<span id="regSeconds">00</span>
+
+<small>Seconds</small>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="countdown-card">
+
+<h3>Next Match</h3>
+
+<div class="countdown">
+
+<div class="box">
+
+<span id="matchDays">00</span>
+
+<small>Days</small>
+
+</div>
+
+<div class="box">
+
+<span id="matchHours">00</span>
+
+<small>Hours</small>
+
+</div>
+
+<div class="box">
+
+<span id="matchMinutes">00</span>
+
+<small>Minutes</small>
+
+</div>
+
+<div class="box">
+
+<span id="matchSeconds">00</span>
+
+<small>Seconds</small>
+
+</div>
+
+</div>
+
+</div>
 
 </section>
 
@@ -90,178 +144,155 @@
 
 <div class="container">
 
-    <aside>
 
-        <div class="card">
 
-            <h3>Contact Myu</h3>
+<aside>
 
-            <p>
-                Hubungi admin apabila ingin melakukan konfirmasi atau bertanya mengenai scrim.
-            </p>
+<div class="card">
 
-            <a
-            href="https://wa.me/6288210222618"
-            target="_blank"
-            class="contact-btn">
+<h2>Registered Team</h2>
 
-                CONTACT MYU
+<div class="team-counter">
 
-            </a>
+<span id="teamCount">
 
-        </div>
+0 / 16 Team
 
-
-
-        <div class="card">
-
-            <h3>Match Info</h3>
-
-            <ul>
-
-                <li>Status <span>Available ✅</span></li>
-
-                <li>Mode <span>BO3</span></li>
-
-                <li>Region <span>Indonesia</span></li>
-
-                <li>Entry <span>FREE</span></li>
-
-            </ul>
-
-        </div>
-
-
-
-        <div class="card">
-
-            <h3>Rules</h3>
-
-            <ul class="rules">
-
-                <li>Standby 10 menit sebelum pertandingan.</li>
-
-                <li>Mode Custom Draft Pick.</li>
-
-                <li>Pause maksimal 1 kali.</li>
-
-                <li>Dilarang menggunakan Cheat.</li>
-
-                <li>Dilarang Toxic Berlebihan.</li>
-
-                <li>Wajib mengikuti keputusan panitia.</li>
-
-            </ul>
-
-        </div>
-
-    </aside>
-
-
-
-    <main class="card">
-
-        <h2>FORM PENDAFTARAN</h2>
-
-        <form id="scrimForm">
-
-            <div class="grid">
-
-                <div class="input-box">
-
-                    <label>Nama Tim</label>
-
-                    <input
-                    type="text"
-                    id="teamName"
-                    required>
-
-                </div>
-
-
-                <div class="input-box">
-
-                    <label>Rank</label>
-
-                    <select id="avgRank">
-
-                        <option>Epic / Legend</option>
-
-                        <option>Mythic</option>
-
-                        <option>Mythical Honor</option>
-
-                        <option>Mythical Glory</option>
-
-                        <option>Mythical Immortal</option>
-
-                    </select>
-
-                </div>
-
-
-
-                <div class="input-box">
-
-                    <label>Nickname Kapten</label>
-
-                    <input
-                    type="text"
-                    id="captainName"
-                    required>
-
-                </div>
-
-
-                <div class="input-box">
-
-                    <label>Nomor WhatsApp</label>
-
-                    <input
-                    type="tel"
-                    id="captainWa"
-                    required>
-
-                </div>
-
-
-
-                <div class="input-box full">
-
-                    <label>Jam Match</label>
-
-                    <input
-                    type="text"
-                    value="19.00 WIB"
-                    readonly>
-
-                </div>
-
-
-
-                <div class="input-box full">
-
-                    <label>Catatan</label>
-
-                    <textarea
-                    rows="4"
-                    id="notes"></textarea>
-
-                </div>
-
-            </div>
-
-            <button class="submit-btn">
-
-                ENTER THE ARENA ⚔
-
-            </button>
-
-        </form>
-
-    </main>
+</span>
 
 </div>
+
+<div id="teamList">
+
+<div class="empty">
+
+Belum ada tim yang mendaftar.
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Match Bracket</h2>
+
+<div id="bracket">
+
+<div class="empty">
+
+Bracket akan dibuat setelah pendaftaran ditutup.
+
+</div>
+
+</div>
+
+</div>
+
+</aside>
+
+
+
+<main class="card">
+
+<h2>Registration Form</h2>
+
+<form id="registerForm">
+
+<div class="input-group">
+
+<label>Nama Tim</label>
+
+<input
+type="text"
+id="teamName"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>Rank</label>
+
+<select id="rank">
+
+<option>Epic / Legend</option>
+
+<option>Mythic</option>
+
+<option>Mythical Honor</option>
+
+<option>Mythical Glory</option>
+
+<option>Mythical Immortal</option>
+
+</select>
+
+</div>
+
+<div class="input-group">
+
+<label>Nickname Kapten</label>
+
+<input
+type="text"
+id="captain"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>WhatsApp Kapten</label>
+
+<input
+type="tel"
+id="whatsapp"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>Catatan</label>
+
+<textarea
+rows="4"
+id="notes"></textarea>
+
+</div>
+
+<button
+type="submit"
+id="submitBtn">
+
+ENTER THE ARENA
+
+</button>
+
+</form>
+
+</main>
+
+</div>
+
+
+
+<section class="contact">
+
+<a
+href="https://wa.me/6288210222618"
+target="_blank">
+
+CONTACT MYU
+
+</a>
+
+</section>
+
 
 
 <footer>
@@ -269,6 +300,10 @@
 SCRIM ARENA © 2026
 
 </footer>
+
+
+
+<script type="module" src="firebase.js"></script>
 
 <script src="script.js"></script>
 
